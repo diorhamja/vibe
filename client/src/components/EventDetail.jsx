@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,9 +24,35 @@ const EventDetail = ({ open, event, onClose }) => {
 
   const [quantity, setQuantity] = useState(1);
   const [reserved, setReserved] = useState(false);
+  const [hasReservation, setHasReservation] = useState(false);
+  const [existingReservation, setExistingReservation] = useState(null);
   const [isFinishOpen, setIsFinishOpen] = useState(false);
 
   if (!event) return null;
+
+  useEffect(() => {
+    const checkReservation = async () => {
+      if (!event || !user) return;
+
+      try {
+        const res = await axios.post(
+          "http://localhost:8000/api/reservations/check",
+          {
+            event: event._id,
+            user: user._id,
+          },
+          { withCredentials: true }
+        );
+
+        setHasReservation(res.data.hasReservation);
+        setExistingReservation(res.data.reservation || null);
+      } catch (err) {
+        console.error("Error checking reservation:", err);
+      }
+    };
+
+    checkReservation();
+  }, [event, user]);
 
   const handleReserve = async () => {
     try {
@@ -64,6 +90,7 @@ const EventDetail = ({ open, event, onClose }) => {
   return (
     <>
       <FinishAlert open={isFinishOpen} onClose={() => setIsFinishOpen(false)} />
+
       <Dialog
         open={open}
         onClose={onClose}
@@ -76,7 +103,7 @@ const EventDetail = ({ open, event, onClose }) => {
             backgroundColor: "#0f172a",
             color: "white",
             position: "relative",
-            height: "85vh",
+            height: "75vh",
           },
         }}
       >
@@ -94,7 +121,6 @@ const EventDetail = ({ open, event, onClose }) => {
               left: 0,
             }}
           />
-
           <Box
             sx={{
               position: "absolute",
@@ -106,7 +132,6 @@ const EventDetail = ({ open, event, onClose }) => {
                 "linear-gradient(to bottom, rgba(15,23,42,0) 50%, #0f172a 100%)",
             }}
           />
-
           <Box
             sx={{
               position: "absolute",
@@ -123,7 +148,6 @@ const EventDetail = ({ open, event, onClose }) => {
               alt={event.business?.name}
               sx={{ width: 48, height: 48 }}
             />
-
             <Box>
               <Typography variant="h5" fontWeight={700} color="white">
                 {event.title}
@@ -186,44 +210,90 @@ const EventDetail = ({ open, event, onClose }) => {
             </Typography>
           </Box>
 
-          <Typography variant="body2" color="rgba(255,255,255,0.8)" mb={1}>
-            Available Spots: {event.spotsLeft || "N/A"}
-          </Typography>
+          {hasReservation ? (
+            <Box
+              sx={{
+                mt: 2,
+                p: 2,
+                backgroundColor: "#1e293b",
+                borderRadius: 2,
+                border: "1px solid #334155",
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                color="success.main"
+                gutterBottom
+              >
+                🎉 You're already booked!
+              </Typography>
+              <Typography variant="body2" color="rgba(255,255,255,0.9)">
+                You reserved{" "}
+                <strong>{existingReservation?.noReservations || 1}</strong>{" "}
+                ticket{existingReservation?.noReservations > 1 ? "s" : ""}.
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ mt: 1, color: "rgba(255,255,255,0.6)" }}
+              >
+                Show up early and enjoy the event! ✨
+              </Typography>
+            </Box>
+          ) : (
+            <>
+              <Typography
+                variant="body2"
+                color="rgba(255,255,255,0.8)"
+                mb={1}
+                mt={2}
+              >
+                Available Spots: {event.spotsLeft || "N/A"}
+              </Typography>
 
-          <TextField
-            type="number"
-            label="Tickets"
-            value={quantity}
-            onChange={(e) => setQuantity(parseInt(e.target.value))}
-            InputProps={{
-              inputProps: { min: 1, max: event.availableSpots || 10 },
-              sx: { color: "white" },
-              endAdornment: <InputAdornment position="end">x</InputAdornment>,
-            }}
-            InputLabelProps={{ style: { color: "#cbd5e1" } }}
-            fullWidth
-            sx={{
-              mt: 1,
-              input: { color: "white" },
-              label: { color: "white" },
-            }}
-          />
+              <TextField
+                type="number"
+                label="Tickets"
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value))}
+                InputProps={{
+                  inputProps: {
+                    min: 1,
+                    max: event.spotsLeft || 10,
+                  },
+                  sx: { color: "white" },
+                  endAdornment: (
+                    <InputAdornment position="end">x</InputAdornment>
+                  ),
+                }}
+                InputLabelProps={{ style: { color: "#cbd5e1" } }}
+                fullWidth
+                sx={{
+                  mt: 1,
+                  input: { color: "white" },
+                  label: { color: "white" },
+                }}
+              />
+            </>
+          )}
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button
-            onClick={handleReserve}
-            variant={reserved ? "outlined" : "contained"}
-            color="success"
-            fullWidth
-            size="large"
-            disabled={reserved}
-          >
-            {reserved
-              ? "Reserved"
-              : `Reserve ${quantity} Ticket${quantity > 1 ? "s" : ""}`}
-          </Button>
-        </DialogActions>
+        {!hasReservation && (
+          <DialogActions sx={{ px: 3, pb: 3 }}>
+            <Button
+              onClick={handleReserve}
+              variant={reserved ? "outlined" : "contained"}
+              color="success"
+              fullWidth
+              size="large"
+              disabled={reserved}
+            >
+              {reserved
+                ? "Reserved"
+                : `Reserve ${quantity} Ticket${quantity > 1 ? "s" : ""}`}
+            </Button>
+          </DialogActions>
+        )}
       </Dialog>
     </>
   );

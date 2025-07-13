@@ -11,8 +11,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEvents } from "../context/EventContext";
 import EventCard from "./EventCard";
+import EventDetail from "./EventDetail";
+import { useDialog } from "../context/DialogContext";
 
 const ShowMap = () => {
+  const { openDialog } = useDialog();
   const { user, userLocation } = useAuth();
   const { events, selectedEvent, setSelectedEvent } = useEvents();
 
@@ -45,18 +48,20 @@ const ShowMap = () => {
         lat: selectedEvent.business.location.coordinates[0],
         lng: selectedEvent.business.location.coordinates[1],
       };
-      mapRef.current.panTo(center);
-      mapRef.current.setZoom(18);
+
+      mapRef.current.panTo(center, { duration: 1000 });
     }
-  }, [userLocation]);
+  }, [selectedEvent]);
 
   const handleMarkerClick = (event) => {
     if (!user) {
       navigate("/login");
       return;
     }
-
     setSelectedEvent(event);
+    openDialog(
+      <EventDetail open={true} event={event} onClose={() => openDialog(null)} />
+    );
   };
 
   const BlueDot = () => (
@@ -70,6 +75,18 @@ const ShowMap = () => {
       }}
     />
   );
+
+  const handleMarkerMouseOver = (event, mapEvent) => {
+    setHoveredEvent({
+      ...event,
+      lat: event.business.location.coordinates[0],
+      lng: event.business.location.coordinates[1],
+    });
+  };
+
+  const handleMarkerMouseOut = () => {
+    setHoveredEvent(null);
+  };
 
   return (
     <APIProvider apiKey={import.meta.env.VITE_API_KEY}>
@@ -110,19 +127,27 @@ const ShowMap = () => {
                   width: 35,
                   height: 35,
                   color: "#fc7cd2",
-                  animation: "glowPulse 1.8s infinite ease-in-out",
+                  animation: "glowPulse 1.5s infinite ease-in-out",
                   "@keyframes glowPulse": {
                     "0%": {
-                      filter: "drop-shadow(0 0 0px #fc7cd2)",
-                      transform: "scale(1)",
+                      filter:
+                        "drop-shadow(0 0 0px #fc7cd2) hue-rotate(0deg) brightness(1)",
+                      transform: "scale(1) rotate(0deg)",
                     },
-                    "50%": {
-                      filter: "drop-shadow(0 0 12px #fc7cd2)",
-                      transform: "scale(1.1)",
+                    "33%": {
+                      filter:
+                        "drop-shadow(0 0 15px #fc7cd2) drop-shadow(0 0 25px #ff69b4) hue-rotate(15deg) brightness(1.3)",
+                      transform: "scale(1.1) rotate(2deg)",
+                    },
+                    "66%": {
+                      filter:
+                        "drop-shadow(0 0 25px #fc7cd2) drop-shadow(0 0 40px #ff1493) hue-rotate(30deg) brightness(1.5)",
+                      transform: "scale(1.2) rotate(-2deg)",
                     },
                     "100%": {
-                      filter: "drop-shadow(0 0 0px #fc7cd2)",
-                      transform: "scale(1)",
+                      filter:
+                        "drop-shadow(0 0 0px #fc7cd2) hue-rotate(0deg) brightness(1)",
+                      transform: "scale(1) rotate(0deg)",
                     },
                   },
                 }}
@@ -139,8 +164,9 @@ const ShowMap = () => {
                 key={index}
                 position={{ lat, lng }}
                 onClick={() => handleMarkerClick(event)}
-                onMouseOver={() => setHoveredEvent({ ...event, lat, lng })}
-                onMouseOut={() => setHoveredEvent(null)}
+                onMouseEnter={() => handleMarkerMouseOver(event)}
+                onMouseLeave={handleMarkerMouseOut}
+                style={{ cursor: "pointer" }}
               >
                 <LocationOnOutlinedIcon
                   sx={{
@@ -152,23 +178,22 @@ const ShowMap = () => {
               </AdvancedMarker>
             );
           })}
-
-          {hoveredEvent && (
-            <Box
-              sx={{
-                position: "absolute",
-                left: "calc(40vw / 2)",
-                top: "20px",
-                transform: "translateX(-50%)",
-                zIndex: 1000,
-                pointerEvents: "none",
-                width: 300,
-              }}
-            >
-              <EventCard event={hoveredEvent} size="small" />
-            </Box>
-          )}
         </Map>
+        {hoveredEvent && (
+          <Box
+            sx={{
+              position: "absolute",
+              left: "87%",
+              top: "10%",
+              transform: "translateX(-50%)",
+              zIndex: 1000,
+              pointerEvents: "none",
+              width: 300,
+            }}
+          >
+            <EventCard event={hoveredEvent} size="small" />
+          </Box>
+        )}
       </Box>
     </APIProvider>
   );

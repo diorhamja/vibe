@@ -1,11 +1,20 @@
 import React from "react";
-import { Card, CardMedia, CardContent, Typography, Box } from "@mui/material";
+import {
+  Card,
+  CardMedia,
+  CardContent,
+  Typography,
+  Box,
+  Button,
+} from "@mui/material";
 import SellOutlinedIcon from "@mui/icons-material/SellOutlined";
+import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useDialog } from "../context/DialogContext";
 import EventDetail from "./EventDetail";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import EditEvent from "./EditEvent";
 
 const EventCard = ({ event, size = "medium" }) => {
   const { user } = useAuth();
@@ -38,9 +47,17 @@ const EventCard = ({ event, size = "medium" }) => {
       onClick={() => {
         if (!user) {
           navigate("/login");
-        } else {
+        } else if (user.role == "user") {
           openDialog(
             <EventDetail
+              open={true}
+              event={event}
+              onClose={() => openDialog(null)}
+            />
+          );
+        } else if (user.role == "business") {
+          openDialog(
+            <EditEvent
               open={true}
               event={event}
               onClose={() => openDialog(null)}
@@ -138,10 +155,18 @@ const EventCard = ({ event, size = "medium" }) => {
             zIndex: 2,
           }}
         >
-          <SellOutlinedIcon sx={{ fontSize: 18, color: "#22c55e" }} />
-          <Typography variant="body2" fontWeight={600} color="white">
-            ${event.price}
-          </Typography>
+          {user?.role == "business" ? (
+            <>
+              <ModeEditOutlineOutlinedIcon />
+            </>
+          ) : (
+            <>
+              <SellOutlinedIcon sx={{ fontSize: 18, color: "#22c55e" }} />
+              <Typography variant="body2" fontWeight={600} color="white">
+                {event.price === 0 ? "Free" : `$${event.price}`}
+              </Typography>
+            </>
+          )}
         </Box>
 
         <CardContent

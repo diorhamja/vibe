@@ -78,7 +78,6 @@ const Header = () => {
               variant: "standard",
               InputProps: { disableUnderline: true },
               sx: {
-                placeholder: "All Time",
                 width: "170px",
                 borderRadius: "25px",
                 boxShadow: "0 0 10px rgba(0, 0, 0, 0.08)",
@@ -89,8 +88,8 @@ const Header = () => {
                 "& .MuiInputBase-root": {
                   borderBottom: "none !important",
                 },
-                "& input::placeholder": {
-                  opacity: 0,
+                "& .MuiInputBase-input": {
+                  color: selectedDate ? "black" : "transparent !important",
                 },
               },
             },
@@ -124,7 +123,13 @@ const Header = () => {
               >
                 <MenuItem
                   onClick={() => {
-                    navigate("/account");
+                    if (user.role == "user") {
+                      navigate("/account");
+                    } else if (user.role == "business") {
+                      navigate("/business/account");
+                    } else {
+                      navigate("/");
+                    }
                     handleMenuClose();
                   }}
                 >

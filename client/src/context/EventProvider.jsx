@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import EventContext from "./EventContext";
 import axios from "axios";
+import { useAuth } from "./AuthContext";
 
 const EventProvider = ({ children }) => {
+  const { user } = useAuth();
+
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -33,7 +37,8 @@ const EventProvider = ({ children }) => {
     };
 
     fetchEvents();
-  }, [selectedDate]);
+    setRefresh(false);
+  }, [selectedDate, refresh, user]);
 
   const fetchAddress = async (lat, lng) => {
     try {
@@ -76,6 +81,7 @@ const EventProvider = ({ children }) => {
         fetchAddress,
         selectedDate,
         setSelectedDate,
+        setRefresh,
       }}
     >
       {children}

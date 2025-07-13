@@ -14,12 +14,15 @@ import {
 } from "@mui/material";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import axios from "axios";
+import { useEvents } from "../context/EventContext";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 const AddEvent = ({ open, onClose, onEventAdded }) => {
+  const { setRefresh } = useEvents();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
@@ -109,6 +112,7 @@ const AddEvent = ({ open, onClose, onEventAdded }) => {
       console.error(err);
       setError("Failed to create event.");
     } finally {
+      setRefresh(true);
       setLoading(false);
     }
   };
@@ -468,23 +472,6 @@ const AddEvent = ({ open, onClose, onEventAdded }) => {
 
       <DialogActions sx={{ px: 3, pb: 2, pt: 3 }}>
         <Button
-          onClick={onClose}
-          disabled={loading}
-          sx={{
-            mr: 2,
-            px: 3,
-            py: 1.5,
-            color: "#4A5568",
-            borderColor: "#E2E8F0",
-            "&:hover": {
-              backgroundColor: "#F7FAFC",
-            },
-          }}
-          variant="outlined"
-        >
-          Cancel
-        </Button>
-        <Button
           onClick={handleSubmit}
           variant="contained"
           disabled={loading}
@@ -501,6 +488,23 @@ const AddEvent = ({ open, onClose, onEventAdded }) => {
           }}
         >
           {loading ? "Creating..." : "Create Event"}
+        </Button>
+        <Button
+          onClick={onClose}
+          disabled={loading}
+          sx={{
+            mr: 2,
+            px: 3,
+            py: 1.5,
+            color: "#4A5568",
+            borderColor: "#E2E8F0",
+            "&:hover": {
+              backgroundColor: "#F7FAFC",
+            },
+          }}
+          variant="outlined"
+        >
+          Cancel
         </Button>
       </DialogActions>
     </Dialog>

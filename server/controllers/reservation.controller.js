@@ -1,6 +1,31 @@
 const Reservation = require('../models/reservation.model');
 const Event = require('../models/event.model');
 
+module.exports.findExistingReservation = async (req, res) => {
+    try {
+        const { event, user } = req.body;
+    
+        const foundEvent = await Event.findById(event);
+        if (!foundEvent)
+            return res.status(404).json({ message: "Event not found" });
+    
+        const existingReservation = await Reservation.findOne({ event, user })
+            .populate("event")
+            .populate("user", "-password");
+    
+        if (existingReservation) {
+            return res.status(200).json({
+            hasReservation: true,
+            reservation: existingReservation,
+            });
+        }
+    
+        res.status(200).json({ hasReservation: false });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
 module.exports.createReservation = async (req, res) => {
     try {
     const { event, user, noReservations } = req.body;
@@ -59,6 +84,35 @@ module.exports.getUserReservedEvents = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+module.exports.getBusinessReservations = async (req, res) => {
+    try {
+        const businessId = req.user._id;
+    
+        const events = await Event.find({ business: businessId });
+    
+        const eventsWithReservations = await Promise.all(
+            events.map(async (event) => {
+            const reservations = await Reservation.find({ event: event._id })
+                .populate("user", "name email profilePicture")
+                .lean();
+    
+            return {
+                _id: event._id,
+                title: event.title,
+                date: event.date,
+                time: event.time,
+                reservations,
+            };
+            })
+        );
+    
+        res.status(200).json(eventsWithReservations);
+        } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to fetch reservations" });
+        }
+    };
 
 module.exports.getAllReservations = async (req, res) => {
     try {

@@ -1,15 +1,14 @@
-import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const PublicRoute = () => {
+const GuestRoute = () => {
   const { user } = useAuth();
 
-  if (user) {
-    return <Navigate to="/" replace />;
+  if (user && user.role == "business") {
+    return <Navigate to="/business" replace />;
   }
 
   return <Outlet />;
 };
 
-export default PublicRoute;
+export default GuestRoute;

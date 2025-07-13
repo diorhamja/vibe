@@ -58,16 +58,15 @@ const BusinessRegister = () => {
 
   const handleAddressSearch = (value) => {
     setAddressInput(value);
-
     if (value.length > 2 && autocompleteService.current) {
       autocompleteService.current.getPlacePredictions(
         { input: value, types: ["establishment", "geocode"] },
-        (predictions, status) => {
+        (preds, status) => {
           if (
             status === window.google.maps.places.PlacesServiceStatus.OK &&
-            predictions
+            preds
           ) {
-            setPredictions(predictions.slice(0, 3));
+            setPredictions(preds.slice(0, 3));
           } else {
             setPredictions([]);
           }
@@ -80,7 +79,6 @@ const BusinessRegister = () => {
 
   const handlePlaceSelect = (place) => {
     if (!place || !placesService.current) return;
-
     placesService.current.getDetails(
       { placeId: place.place_id, fields: ["geometry", "formatted_address"] },
       (placeDetails, status) => {
@@ -156,54 +154,55 @@ const BusinessRegister = () => {
       <Paper
         style={{
           width: "100%",
-          maxWidth: "380px",
+          maxWidth: "420px",
           padding: "32px",
-          borderRadius: "16px",
-          backgroundColor: "rgba(255, 255, 255, 0.1)",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+          borderRadius: "24px",
+          background: "rgba(255, 240, 246, 0.65)",
+          backdropFilter: "blur(12px)",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.1)",
         }}
       >
         <Box
           style={{
             display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "24px",
+            justifyContent: "flex-end",
+            marginBottom: "16px",
           }}
         >
-          <Typography
-            style={{
-              color: "#2563eb",
-              fontSize: "24px",
-              fontWeight: "700",
-              fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',
-              textShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            Register your Business!
-          </Typography>
           <IconButton
             onClick={() => navigate("/")}
             style={{
-              color: "#2563eb",
-              padding: "8px",
-              backgroundColor: "rgba(37, 99, 235, 0.1)",
+              color: "#6a5671",
+              background: "rgba(255,255,255,0.6)",
+              border: "1px solid rgba(106, 86, 113, 0.2)",
+              padding: "6px",
               borderRadius: "8px",
-              border: "1px solid rgba(37, 99, 235, 0.2)",
             }}
           >
             <HomeRoundedIcon />
           </IconButton>
         </Box>
 
+        <Typography
+          style={{
+            color: "#6a5671",
+            fontSize: "26px",
+            fontWeight: 600,
+            textAlign: "center",
+            marginBottom: "24px",
+          }}
+        >
+          Register your Business
+        </Typography>
+
         <Box
           style={{
             display: "flex",
-            justifyContent: "center",
+            textAlign: "center",
             marginBottom: "24px",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <input
@@ -219,163 +218,94 @@ const BusinessRegister = () => {
               style={{
                 width: "80px",
                 height: "80px",
-                border: "3px solid #3b82f6",
+                border: "3px solid #c3b6f4",
                 cursor: "pointer",
-                backgroundColor: "rgba(59, 130, 246, 0.1)",
-                boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
+                backgroundColor: "#f5efff",
+                boxShadow: "0 4px 12px rgba(195, 182, 244, 0.4)",
               }}
             >
-              {!previewUrl && <CameraAltIcon style={{ color: "#3b82f6" }} />}
+              {!previewUrl && (
+                <CameraAltIcon style={{ color: "#a78bfa", fontSize: "30px" }} />
+              )}
             </Avatar>
           </label>
         </Box>
 
         <Box component="form" onSubmit={handleSubmit}>
-          <TextField
-            fullWidth
-            label="Business Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            style={{ marginBottom: "16px" }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                borderRadius: "8px",
-                "& fieldset": { borderColor: "#d1d5db", borderWidth: "2px" },
-                "&:hover fieldset": { borderColor: "#3b82f6" },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#2563eb",
-                  borderWidth: "2px",
-                },
-              },
-              "& .MuiInputBase-input": { color: "#1f2937", fontSize: "16px" },
-              "& .MuiInputLabel-root": { color: "#6b7280" },
-              "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
-            }}
-          />
-
-          <TextField
-            fullWidth
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ marginBottom: "16px" }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                borderRadius: "8px",
-                "& fieldset": { borderColor: "#d1d5db", borderWidth: "2px" },
-                "&:hover fieldset": { borderColor: "#3b82f6" },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#2563eb",
-                  borderWidth: "2px",
-                },
-              },
-              "& .MuiInputBase-input": { color: "#1f2937", fontSize: "16px" },
-              "& .MuiInputLabel-root": { color: "#6b7280" },
-              "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
-            }}
-          />
-
-          <TextField
-            fullWidth
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ marginBottom: "16px" }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                borderRadius: "8px",
-                "& fieldset": { borderColor: "#d1d5db", borderWidth: "2px" },
-                "&:hover fieldset": { borderColor: "#3b82f6" },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#2563eb",
-                  borderWidth: "2px",
-                },
-              },
-              "& .MuiInputBase-input": { color: "#1f2937", fontSize: "16px" },
-              "& .MuiInputLabel-root": { color: "#6b7280" },
-              "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
-            }}
-          />
-
-          <Box style={{ position: "relative", marginBottom: "16px" }}>
+          {[
+            { label: "Business Name", value: name, setValue: setName },
+            { label: "Email", value: email, setValue: setEmail, type: "email" },
+            {
+              label: "Password",
+              value: password,
+              setValue: setPassword,
+              type: "password",
+            },
+          ].map(({ label, value, setValue, type = "text" }, i) => (
             <TextField
+              key={i}
+              label={label}
+              type={type}
               fullWidth
-              label="Address"
-              value={addressInput}
-              onChange={(e) => handleAddressSearch(e.target.value)}
               required
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              style={{ marginBottom: "16px" }}
               InputProps={{
-                startAdornment: (
-                  <LocationOnIcon
-                    style={{ color: "#3b82f6", marginRight: "8px" }}
-                  />
-                ),
-              }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "rgba(255, 255, 255, 0.9)",
-                  borderRadius: "8px",
-                  "& fieldset": { borderColor: "#d1d5db", borderWidth: "2px" },
-                  "&:hover fieldset": { borderColor: "#3b82f6" },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#2563eb",
-                    borderWidth: "2px",
-                  },
+                style: {
+                  background: "rgba(255, 255, 255, 0.85)",
+                  borderRadius: "12px",
                 },
-                "& .MuiInputBase-input": { color: "#1f2937", fontSize: "16px" },
-                "& .MuiInputLabel-root": { color: "#6b7280" },
-                "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
               }}
+              InputLabelProps={{ style: { color: "#6b7280" } }}
             />
+          ))}
 
-            {predictions.length > 0 && (
-              <Box
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  right: 0,
-                  zIndex: 1000,
-                  backgroundColor: "rgba(255, 255, 255, 0.95)",
-                  borderRadius: "8px",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
-                }}
-              >
-                {predictions.map((prediction) => (
-                  <Box
-                    key={prediction.place_id}
-                    onClick={() => handlePlaceSelect(prediction)}
-                    style={{
-                      padding: "12px",
-                      cursor: "pointer",
-                      borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
-                      transition: "background-color 0.2s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.target.style.backgroundColor = "rgba(0, 0, 0, 0.05)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.target.style.backgroundColor = "transparent")
-                    }
-                  >
-                    <Typography style={{ color: "#333", fontSize: "14px" }}>
-                      {prediction.description}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
-            )}
-          </Box>
+          <TextField
+            label="Address"
+            fullWidth
+            required
+            value={addressInput}
+            onChange={(e) => handleAddressSearch(e.target.value)}
+            style={{ marginBottom: "16px" }}
+            InputProps={{
+              startAdornment: (
+                <LocationOnIcon style={{ color: "#a78bfa", marginRight: 8 }} />
+              ),
+              style: {
+                background: "rgba(255, 255, 255, 0.85)",
+                borderRadius: "12px",
+              },
+            }}
+            InputLabelProps={{ style: { color: "#6b7280" } }}
+          />
+
+          {predictions.length > 0 && (
+            <Box
+              style={{
+                background: "#fff",
+                borderRadius: "10px",
+                marginBottom: "16px",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.1)",
+              }}
+            >
+              {predictions.map((prediction) => (
+                <Box
+                  key={prediction.place_id}
+                  onClick={() => handlePlaceSelect(prediction)}
+                  style={{
+                    padding: "12px",
+                    cursor: "pointer",
+                    borderBottom: "1px solid #eee",
+                  }}
+                >
+                  <Typography style={{ fontSize: "14px" }}>
+                    {prediction.description}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
 
           {error && (
             <Typography
@@ -383,11 +313,10 @@ const BusinessRegister = () => {
                 color: "#dc2626",
                 fontSize: "14px",
                 marginBottom: "16px",
+                background: "#fee2e2",
                 padding: "10px",
-                backgroundColor: "rgba(254, 226, 226, 0.9)",
                 borderRadius: "6px",
-                border: "2px solid #fca5a5",
-                fontWeight: "500",
+                border: "1px solid #fca5a5",
               }}
             >
               {error}
@@ -399,22 +328,14 @@ const BusinessRegister = () => {
             fullWidth
             variant="contained"
             style={{
-              padding: "12px",
-              borderRadius: "8px",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              backgroundColor: "#6a5671",
               color: "#fff",
+              padding: "12px",
+              borderRadius: "12px",
               fontWeight: "600",
               textTransform: "none",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = "rgba(255, 255, 255, 0.3)";
-              e.target.style.transform = "translateY(-1px)";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
-              e.target.style.transform = "translateY(0)";
+              marginTop: "8px",
+              boxShadow: "0 4px 16px rgba(106, 86, 113, 0.3)",
             }}
           >
             Create Account

@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import BookOnlineOutlinedIcon from "@mui/icons-material/BookOnlineOutlined";
 import SettingsIcon from "@mui/icons-material/Settings";
 import HistoryIcon from "@mui/icons-material/History";
 import Header from "../components/Header";
@@ -115,7 +115,7 @@ const AccountView = () => {
               />
               <Tab
                 label="Reservations"
-                icon={<DirectionsCarIcon />}
+                icon={<BookOnlineOutlinedIcon />}
                 iconPosition="start"
                 sx={{
                   justifyContent: "flex-start",
