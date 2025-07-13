@@ -9,6 +9,7 @@ import {
   Menu,
   MenuItem,
   Paper,
+  TextField,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
@@ -70,29 +71,55 @@ const Header = () => {
           onChange={(newDate) => setSelectedDate(newDate)}
           disablePast
           format="MMMM dd, yyyy"
+          enableAccessibleFieldDOMStructure={false}
           slots={{
             openPickerIcon: SearchIcon,
-          }}
-          slotProps={{
-            textField: {
-              variant: "standard",
-              InputProps: { disableUnderline: true },
-              sx: {
-                width: "180px",
-                borderRadius: "25px",
-                boxShadow: "0 0 10px rgba(0, 0, 0, 0.08)",
-                paddingY: 1,
-                paddingX: 2.5,
-                transition: "all 0.2s ease",
-                borderBottom: "none",
-                "& .MuiInputBase-root": {
-                  borderBottom: "none !important",
-                },
-                "& .MuiInputBase-input": {
-                  color: selectedDate ? "black" : "transparent !important",
-                },
-              },
-            },
+            textField: (params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                placeholder=""
+                InputProps={{
+                  ...params.InputProps,
+                  disableUnderline: true,
+                  readOnly: true,
+                }}
+                inputProps={{
+                  ...params.inputProps,
+                  placeholder: "",
+                }}
+                sx={{
+                  width: "180px",
+                  borderRadius: "25px",
+                  boxShadow: "0 0 10px rgba(0, 0, 0, 0.08)",
+                  paddingY: 1,
+                  paddingX: 2.5,
+                  transition: "all 0.2s ease",
+                  cursor: "pointer",
+                  backgroundColor: "#ffffff",
+                  "& .MuiInputBase-root": {
+                    borderBottom: "none !important",
+                    cursor: "pointer",
+                  },
+                  "& .MuiInputBase-input": {
+                    color: selectedDate ? "#000000" : "transparent !important",
+                    cursor: "pointer",
+                    caretColor: "transparent",
+                    "&::placeholder": {
+                      display: "none !important",
+                    },
+                  },
+                  "& input": {
+                    "&::placeholder": {
+                      display: "none !important",
+                    },
+                  },
+                  "&:hover": {
+                    boxShadow: "0 0 15px rgba(0, 0, 0, 0.12)",
+                  },
+                }}
+              />
+            ),
           }}
         />
 

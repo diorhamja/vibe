@@ -60,7 +60,13 @@ const BusinessRegister = () => {
     setAddressInput(value);
     if (value.length > 2 && autocompleteService.current) {
       autocompleteService.current.getPlacePredictions(
-        { input: value, types: ["establishment", "geocode"] },
+        {
+          input: value,
+          types: ["establishment", "geocode"],
+          location: new window.google.maps.LatLng(41.3275, 19.8189), // Tirana center
+          radius: 50000,
+          strictBounds: false,
+        },
         (preds, status) => {
           if (
             status === window.google.maps.places.PlacesServiceStatus.OK &&
@@ -143,41 +149,36 @@ const BusinessRegister = () => {
 
   return (
     <Box
-      style={{
+      sx={{
         minHeight: "80vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "20px",
+        px: 2,
       }}
     >
       <Paper
-        style={{
+        elevation={0}
+        sx={{
           width: "100%",
-          maxWidth: "420px",
-          padding: "32px",
-          borderRadius: "24px",
-          background: "rgba(255, 240, 246, 0.65)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255, 255, 255, 0.3)",
-          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.1)",
+          maxWidth: 420,
+          p: 5,
+          borderRadius: 5,
+          background: "rgba(255, 255, 255, 0.15)",
+          backdropFilter: "blur(14px)",
+          border: "1px solid rgba(255, 255, 255, 0.25)",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
         }}
       >
-        <Box
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: "16px",
-          }}
-        >
+        <Box display="flex" justifyContent="flex-end" mb={1}>
           <IconButton
             onClick={() => navigate("/")}
-            style={{
-              color: "#6a5671",
-              background: "rgba(255,255,255,0.6)",
-              border: "1px solid rgba(106, 86, 113, 0.2)",
-              padding: "6px",
-              borderRadius: "8px",
+            sx={{
+              color: "#6a8caf",
+              transition: "0.3s",
+              "&:hover": {
+                color: "#88a2cf",
+              },
             }}
           >
             <HomeRoundedIcon />
@@ -185,25 +186,18 @@ const BusinessRegister = () => {
         </Box>
 
         <Typography
-          style={{
-            color: "#6a5671",
-            fontSize: "26px",
-            fontWeight: 600,
-            textAlign: "center",
-            marginBottom: "24px",
-          }}
+          variant="h5"
+          align="center"
+          sx={{ fontWeight: 600, color: "#4c4a64", mb: 3 }}
         >
-          Register your Business
+          Register Your Business
         </Typography>
 
         <Box
-          style={{
-            display: "flex",
-            textAlign: "center",
-            marginBottom: "24px",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          display={"flex"}
+          textAlign="center"
+          mb={3}
+          justifyContent={"center"}
         >
           <input
             accept="image/*"
@@ -215,17 +209,16 @@ const BusinessRegister = () => {
           <label htmlFor="upload-profile-pic">
             <Avatar
               src={previewUrl}
-              style={{
-                width: "80px",
-                height: "80px",
-                border: "3px solid #c3b6f4",
+              sx={{
+                width: 80,
+                height: 80,
+                border: "3px solid #b8c9f0",
+                backgroundColor: "#f0f4ff",
                 cursor: "pointer",
-                backgroundColor: "#f5efff",
-                boxShadow: "0 4px 12px rgba(195, 182, 244, 0.4)",
               }}
             >
               {!previewUrl && (
-                <CameraAltIcon style={{ color: "#a78bfa", fontSize: "30px" }} />
+                <CameraAltIcon sx={{ fontSize: 30, color: "#6a8caf" }} />
               )}
             </Avatar>
           </label>
@@ -250,14 +243,22 @@ const BusinessRegister = () => {
               required
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              style={{ marginBottom: "16px" }}
-              InputProps={{
-                style: {
-                  background: "rgba(255, 255, 255, 0.85)",
-                  borderRadius: "12px",
+              margin="normal"
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                  backgroundColor: "#f0f4ff",
+                  "& fieldset": {
+                    borderColor: "#b8c9f0",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#88a2cf",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#6a8caf",
+                  },
                 },
               }}
-              InputLabelProps={{ style: { color: "#6b7280" } }}
             />
           ))}
 
@@ -267,25 +268,35 @@ const BusinessRegister = () => {
             required
             value={addressInput}
             onChange={(e) => handleAddressSearch(e.target.value)}
-            style={{ marginBottom: "16px" }}
+            margin="normal"
             InputProps={{
               startAdornment: (
-                <LocationOnIcon style={{ color: "#a78bfa", marginRight: 8 }} />
+                <LocationOnIcon sx={{ color: "#6a8caf", mr: 1 }} />
               ),
-              style: {
-                background: "rgba(255, 255, 255, 0.85)",
-                borderRadius: "12px",
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 3,
+                backgroundColor: "#f0f4ff",
+                "& fieldset": {
+                  borderColor: "#b8c9f0",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#88a2cf",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#6a8caf",
+                },
               },
             }}
-            InputLabelProps={{ style: { color: "#6b7280" } }}
           />
 
           {predictions.length > 0 && (
             <Box
-              style={{
+              sx={{
                 background: "#fff",
-                borderRadius: "10px",
-                marginBottom: "16px",
+                borderRadius: 2,
+                mb: 2,
                 boxShadow: "0 2px 12px rgba(0,0,0,0.1)",
               }}
             >
@@ -293,15 +304,15 @@ const BusinessRegister = () => {
                 <Box
                   key={prediction.place_id}
                   onClick={() => handlePlaceSelect(prediction)}
-                  style={{
-                    padding: "12px",
+                  sx={{
+                    p: 1.5,
                     cursor: "pointer",
                     borderBottom: "1px solid #eee",
+                    "&:last-child": { borderBottom: "none" },
+                    fontSize: 14,
                   }}
                 >
-                  <Typography style={{ fontSize: "14px" }}>
-                    {prediction.description}
-                  </Typography>
+                  {prediction.description}
                 </Box>
               ))}
             </Box>
@@ -309,15 +320,10 @@ const BusinessRegister = () => {
 
           {error && (
             <Typography
-              style={{
-                color: "#dc2626",
-                fontSize: "14px",
-                marginBottom: "16px",
-                background: "#fee2e2",
-                padding: "10px",
-                borderRadius: "6px",
-                border: "1px solid #fca5a5",
-              }}
+              color="error"
+              variant="body2"
+              align="center"
+              sx={{ mb: 2 }}
             >
               {error}
             </Typography>
@@ -327,15 +333,17 @@ const BusinessRegister = () => {
             type="submit"
             fullWidth
             variant="contained"
-            style={{
-              backgroundColor: "#6a5671",
+            sx={{
+              mt: 2,
+              py: 1.4,
+              backgroundColor: "#6a8caf",
               color: "#fff",
-              padding: "12px",
-              borderRadius: "12px",
-              fontWeight: "600",
+              fontWeight: "bold",
+              borderRadius: 3,
               textTransform: "none",
-              marginTop: "8px",
-              boxShadow: "0 4px 16px rgba(106, 86, 113, 0.3)",
+              "&:hover": {
+                backgroundColor: "#88a2cf",
+              },
             }}
           >
             Create Account

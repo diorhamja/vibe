@@ -38,7 +38,7 @@ const BusinessHome = () => {
         }}
       >
         <Button onClick={handleOpenDialog}>
-          <AddCircleOutlineOutlinedIcon sx={{ padding: 1 }} />
+          <AddCircleOutlineOutlinedIcon sx={{ padding: 1, color: "#0f172a" }} />
         </Button>
       </Box>
 

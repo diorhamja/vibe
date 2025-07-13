@@ -7,10 +7,8 @@ import {
   Slide,
   TextField,
   Button,
-  Grid,
   Box,
   Typography,
-  IconButton,
 } from "@mui/material";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import axios from "axios";
@@ -23,16 +21,22 @@ const Transition = forwardRef(function Transition(props, ref) {
 const AddEvent = ({ open, onClose, onEventAdded }) => {
   const { setRefresh } = useEvents();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [capacity, setCapacity] = useState(15);
-  const [price, setPrice] = useState(0);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    date: "",
+    time: "",
+    capacity: 15,
+    price: 0,
+  });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -47,92 +51,92 @@ const AddEvent = ({ open, onClose, onEventAdded }) => {
       setLoading(true);
       setError("");
 
-      if (!date || !time) {
-        setError("Please select both date and time");
-        setLoading(false);
+      if (!formData.title.trim() || !formData.description.trim()) {
+        setError("Title and Description are required");
         return;
       }
 
-      if (!title.trim()) {
-        setError("Please enter a title");
-        setLoading(false);
-        return;
-      }
+      const data = new FormData();
+      const dateISO = new Date(formData.date).toISOString();
 
-      if (!description.trim()) {
-        setError("Please enter a description");
-        setLoading(false);
-        return;
-      }
-
-      const eventData = new FormData();
-      eventData.append("title", title);
-      eventData.append("description", description);
-
-      const dateObject = new Date(date);
-      eventData.append("date", dateObject.toISOString());
-
-      eventData.append("time", time);
-
-      eventData.append("capacity", capacity);
-      eventData.append("price", price);
+      data.append("title", formData.title);
+      data.append("description", formData.description);
+      data.append("date", dateISO);
+      data.append("time", formData.time);
+      data.append("capacity", formData.capacity);
+      data.append("price", formData.price);
 
       if (imageFile) {
-        eventData.append("profilePicture", imageFile);
+        data.append("eventImage", imageFile);
       }
 
-      console.log("Sending date:", dateObject.toISOString());
-      console.log("Sending time:", time);
-
-      for (let [key, value] of eventData.entries()) {
-        console.log(`${key}:`, value);
-      }
-
-      const res = await axios.post(
+      const response = await axios.post(
         "http://localhost:8000/api/events",
-        eventData,
+        data,
         {
           headers: { "Content-Type": "multipart/form-data" },
           withCredentials: true,
         }
       );
 
-      onEventAdded(res.data);
-
-      setTitle("");
-      setDescription("");
-      setDate("");
-      setTime("");
-      setCapacity(15);
-      setPrice(0);
+      onEventAdded(response.data);
+      setFormData({
+        title: "",
+        description: "",
+        date: "",
+        time: "",
+        capacity: 15,
+        price: 0,
+      });
       setImageFile(null);
       setImagePreview(null);
       onClose();
     } catch (err) {
       console.error(err);
-      setError("Failed to create event.");
+      setError("Failed to create event");
     } finally {
       setRefresh(true);
       setLoading(false);
     }
   };
 
+  const textFieldStyles = {
+    "& .MuiOutlinedInput-root": {
+      color: "#e2e8f0",
+      backgroundColor: "#1e293b",
+      "& fieldset": {
+        borderColor: "#475569",
+        borderWidth: "2px",
+      },
+      "&:hover fieldset": {
+        borderColor: "#64748b",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#3b82f6",
+        borderWidth: "2px",
+      },
+    },
+    "& .MuiInputLabel-root": {
+      color: "#94a3b8",
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#3b82f6",
+    },
+  };
+
   return (
     <Dialog
       open={open}
-      TransitionComponent={Transition}
-      keepMounted
       onClose={onClose}
+      TransitionComponent={Transition}
       maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
           borderRadius: 4,
-          bgcolor: "#FFFFFF",
-          p: 3,
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15)",
-          height: "75vh",
-          width: "40vw",
+          padding: 3,
+          backgroundColor: "#0f172a",
+          border: "1px solid #1e293b",
         },
       }}
     >
@@ -140,350 +144,180 @@ const AddEvent = ({ open, onClose, onEventAdded }) => {
         sx={{
           textAlign: "center",
           fontWeight: 700,
-          fontSize: "24px",
-          color: "#2D3748",
-          pb: 2,
+          color: "#f1f5f9",
+          marginBottom: 2,
         }}
       >
         Create New Event
       </DialogTitle>
 
       <DialogContent>
-        <Box
-          sx={{
-            position: "relative",
-            border: "2px dashed #ccc",
-            borderRadius: 2,
-            height: 200,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            mb: 3,
-            overflow: "hidden",
-            cursor: "pointer",
-            bgcolor: "#fff",
-          }}
-          onClick={() => document.getElementById("event-image-input").click()}
-        >
-          {imagePreview ? (
-            <img
-              src={imagePreview}
-              alt="Preview"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          ) : (
-            <Box sx={{ textAlign: "center", color: "#999" }}>
-              <AddAPhotoIcon sx={{ fontSize: 40 }} />
-              <Typography variant="body2">
-                Click to upload event image
-              </Typography>
-            </Box>
-          )}
-          <input
-            id="event-image-input"
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            style={{ display: "none" }}
-          />
-        </Box>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label
-              style={{
-                fontSize: "14px",
-                fontWeight: "600",
-                color: "#2D3748",
-                fontFamily: "inherit",
-              }}
-            >
-              Event Title *
-            </label>
+        <Box display="flex" flexDirection="column" gap={3}>
+          <Box
+            sx={{
+              border: "2px dashed #475569",
+              borderRadius: 2,
+              height: 180,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              backgroundColor: "#1e293b",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                borderColor: "#64748b",
+                backgroundColor: "#334155",
+              },
+            }}
+            onClick={() => document.getElementById("event-image-input").click()}
+          >
+            {imagePreview ? (
+              <img
+                src={imagePreview}
+                alt="Preview"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  textAlign: "center",
+                  color: "#94a3b8",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <AddAPhotoIcon sx={{ fontSize: 40 }} />
+                <Typography variant="body2">Upload Event Image</Typography>
+              </Box>
+            )}
             <input
-              type="text"
-              value={title}
-              onChange={(e) => {
-                console.log("Title changed:", e.target.value);
-                setTitle(e.target.value);
-              }}
-              placeholder="Enter event title"
-              style={{
-                width: "100%",
-                padding: "14px 16px",
-                border: "2px solid #E2E8F0",
-                borderRadius: "12px",
-                fontSize: "16px",
-                fontFamily: "inherit",
-                backgroundColor: "#FFFFFF",
-                outline: "none",
-                transition: "all 0.2s ease",
-                boxSizing: "border-box",
-                color: "black",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "#4299E1")}
-              onBlur={(e) => (e.target.style.borderColor = "#E2E8F0")}
-              required
+              id="event-image-input"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              style={{ display: "none" }}
             />
-          </div>
+          </Box>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label
-              style={{
-                fontSize: "14px",
-                fontWeight: "600",
-                color: "#2D3748",
-                fontFamily: "inherit",
-              }}
-            >
-              Description *
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => {
-                console.log("Description changed:", e.target.value);
-                setDescription(e.target.value);
-              }}
-              placeholder="Describe your event..."
-              rows={4}
-              style={{
-                width: "100%",
-                padding: "14px 16px",
-                border: "2px solid #E2E8F0",
-                borderRadius: "12px",
-                fontSize: "16px",
-                fontFamily: "inherit",
-                backgroundColor: "#FFFFFF",
-                outline: "none",
-                transition: "all 0.2s ease",
-                resize: "vertical",
-                minHeight: "100px",
-                boxSizing: "border-box",
-                color: "black",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "#4299E1")}
-              onBlur={(e) => (e.target.style.borderColor = "#E2E8F0")}
+          <TextField
+            label="Event Title"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            fullWidth
+            required
+            placeholder="Enter event title"
+            sx={textFieldStyles}
+          />
+
+          <TextField
+            label="Description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            fullWidth
+            multiline
+            rows={4}
+            required
+            placeholder="Write something about your event..."
+            sx={textFieldStyles}
+          />
+
+          <Box display="flex" gap={2}>
+            <TextField
+              label="Date"
+              name="date"
+              type="date"
+              value={formData.date}
+              onChange={handleChange}
+              fullWidth
               required
+              InputLabelProps={{
+                shrink: true,
+              }}
+              sx={textFieldStyles}
             />
-          </div>
+            <TextField
+              label="Time"
+              name="time"
+              type="time"
+              value={formData.time}
+              onChange={handleChange}
+              fullWidth
+              required
+              InputLabelProps={{
+                shrink: true,
+              }}
+              sx={textFieldStyles}
+            />
+          </Box>
 
-          <div style={{ display: "flex", gap: "16px" }}>
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-              }}
-            >
-              <label
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#2D3748",
-                  fontFamily: "inherit",
-                }}
-              >
-                Date *
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => {
-                  console.log("Date changed:", e.target.value);
-                  setDate(e.target.value);
-                }}
-                style={{
-                  width: "100%",
-                  padding: "14px 16px",
-                  border: "2px solid #E2E8F0",
-                  borderRadius: "12px",
-                  fontSize: "16px",
-                  fontFamily: "inherit",
-                  backgroundColor: "#FFFFFF",
-                  outline: "none",
-                  transition: "all 0.2s ease",
-                  boxSizing: "border-box",
-                  color: "black",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#4299E1")}
-                onBlur={(e) => (e.target.style.borderColor = "#E2E8F0")}
-                required
-              />
-            </div>
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-              }}
-            >
-              <label
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#2D3748",
-                  fontFamily: "inherit",
-                }}
-              >
-                Time *
-              </label>
-              <input
-                type="time"
-                value={time}
-                onChange={(e) => {
-                  console.log("Time changed:", e.target.value);
-                  setTime(e.target.value);
-                }}
-                style={{
-                  width: "100%",
-                  padding: "14px 16px",
-                  border: "2px solid #E2E8F0",
-                  borderRadius: "12px",
-                  fontSize: "16px",
-                  fontFamily: "inherit",
-                  backgroundColor: "#FFFFFF",
-                  outline: "none",
-                  transition: "all 0.2s ease",
-                  boxSizing: "border-box",
-                  color: "black",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#4299E1")}
-                onBlur={(e) => (e.target.style.borderColor = "#E2E8F0")}
-                required
-              />
-            </div>
-          </div>
-
-          <div style={{ display: "flex", gap: "16px" }}>
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-              }}
-            >
-              <label
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#2D3748",
-                  fontFamily: "inherit",
-                }}
-              >
-                Capacity *
-              </label>
-              <input
-                type="number"
-                value={capacity}
-                onChange={(e) => {
-                  console.log("Capacity changed:", e.target.value);
-                  setCapacity(e.target.value);
-                }}
-                min="1"
-                max="500"
-                placeholder="Max attendees"
-                style={{
-                  width: "100%",
-                  padding: "14px 16px",
-                  border: "2px solid #E2E8F0",
-                  borderRadius: "12px",
-                  fontSize: "16px",
-                  fontFamily: "inherit",
-                  backgroundColor: "#FFFFFF",
-                  outline: "none",
-                  transition: "all 0.2s ease",
-                  boxSizing: "border-box",
-                  color: "black",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#4299E1")}
-                onBlur={(e) => (e.target.style.borderColor = "#E2E8F0")}
-                required
-              />
-            </div>
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-              }}
-            >
-              <label
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#2D3748",
-                  fontFamily: "inherit",
-                }}
-              >
-                Price *
-              </label>
-              <input
-                type="number"
-                value={price}
-                onChange={(e) => {
-                  console.log("Price changed:", e.target.value);
-                  setPrice(e.target.value);
-                }}
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                style={{
-                  width: "100%",
-                  padding: "14px 16px",
-                  border: "2px solid #E2E8F0",
-                  borderRadius: "12px",
-                  fontSize: "16px",
-                  fontFamily: "inherit",
-                  backgroundColor: "#FFFFFF",
-                  outline: "none",
-                  transition: "all 0.2s ease",
-                  boxSizing: "border-box",
-                  color: "black",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#4299E1")}
-                onBlur={(e) => (e.target.style.borderColor = "#E2E8F0")}
-                required
-              />
-            </div>
-          </div>
+          <Box display="flex" gap={2}>
+            <TextField
+              label="Capacity"
+              name="capacity"
+              type="number"
+              value={formData.capacity}
+              onChange={handleChange}
+              fullWidth
+              required
+              sx={textFieldStyles}
+            />
+            <TextField
+              label="Price"
+              name="price"
+              type="number"
+              value={formData.price}
+              onChange={handleChange}
+              fullWidth
+              required
+              sx={textFieldStyles}
+            />
+          </Box>
 
           {error && (
-            <div
-              style={{
-                padding: "12px 16px",
-                backgroundColor: "#FED7D7",
-                border: "1px solid #E53E3E",
-                borderRadius: "8px",
-                color: "#C53030",
-                fontSize: "14px",
-                fontWeight: "500",
-                color: "red",
+            <Typography
+              sx={{
+                color: "#ef4444",
+                textAlign: "center",
+                backgroundColor: "#fef2f2",
+                padding: 2,
+                borderRadius: 1,
+                border: "1px solid #fecaca",
               }}
             >
               {error}
-            </div>
+            </Typography>
           )}
-        </div>
+        </Box>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 2, pt: 3 }}>
+      <DialogActions sx={{ paddingX: 3, paddingBottom: 2, gap: 2 }}>
         <Button
           onClick={handleSubmit}
           variant="contained"
           disabled={loading}
           sx={{
-            px: 4,
-            py: 1.5,
-            backgroundColor: "#4299E1",
+            backgroundColor: "#3b82f6",
+            color: "#ffffff",
+            fontWeight: 600,
+            paddingX: 4,
+            paddingY: 1.5,
+            borderRadius: 2,
+            textTransform: "none",
             "&:hover": {
-              backgroundColor: "#3182CE",
+              backgroundColor: "#2563eb",
             },
             "&:disabled": {
-              backgroundColor: "#CBD5E0",
+              backgroundColor: "#64748b",
+              color: "#94a3b8",
             },
           }}
         >
@@ -493,16 +327,20 @@ const AddEvent = ({ open, onClose, onEventAdded }) => {
           onClick={onClose}
           disabled={loading}
           sx={{
-            mr: 2,
-            px: 3,
-            py: 1.5,
-            color: "#4A5568",
-            borderColor: "#E2E8F0",
+            color: "#94a3b8",
+            fontWeight: 500,
+            paddingX: 4,
+            paddingY: 1.5,
+            borderRadius: 2,
+            textTransform: "none",
             "&:hover": {
-              backgroundColor: "#F7FAFC",
+              backgroundColor: "#1e293b",
+              color: "#e2e8f0",
+            },
+            "&:disabled": {
+              color: "#475569",
             },
           }}
-          variant="outlined"
         >
           Cancel
         </Button>

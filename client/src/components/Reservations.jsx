@@ -15,7 +15,7 @@ import { useEvents } from "../context/EventContext";
 
 const Reservations = () => {
   const { user } = useAuth();
-  const { selectedDate } = useEvents();
+  const { selectedDate, refresh, setRefresh } = useEvents();
 
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +23,8 @@ const Reservations = () => {
 
   useEffect(() => {
     fetchUserReservations();
-  }, [selectedDate]);
+    setRefresh(false);
+  }, [selectedDate, refresh, user]);
 
   const fetchUserReservations = async () => {
     try {

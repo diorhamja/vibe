@@ -22,4 +22,3 @@ app.use('/api/reservations', reservationRoutes);
 app.listen(8000, () => {
     console.log("Listening at Port 8000")
 })
-

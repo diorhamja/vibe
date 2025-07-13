@@ -1,4 +1,5 @@
 const Event = require('../models/event.model');
+const Reservation = require('../models/reservation.model');
 
 module.exports.getAllEvents = async (req, res) => {
     try {
@@ -23,6 +24,9 @@ module.exports.createEvent = async (req, res) => {
     try {
         const imageUrl = req.file ? req.file.path : '';
 
+        console.log('Request body:', req.body);
+        console.log('Uploaded file:', req.file);
+
         const event = await Event.create({
             ...req.body,
             spotsLeft: req.body.capacity,
@@ -32,6 +36,7 @@ module.exports.createEvent = async (req, res) => {
 
         res.status(201).json(event);
     } catch (err) {
+        console.error('Create event error:', err);
         res.status(400).json({ error: err.message });
     }
 };
@@ -53,9 +58,13 @@ module.exports.updateEvent = async (req, res) => {
             updateData.image = req.file.path;
         }
 
+        console.log('Update data:', updateData);
+        console.log('Uploaded file:', req.file);
+
         const updated = await Event.findByIdAndUpdate(req.params.id, updateData, { new: true });
         res.json(updated);
     } catch (err) {
+        console.error('Update event error:', err);
         res.status(400).json({ error: err.message });
     }
 };
@@ -69,9 +78,13 @@ module.exports.deleteEvent = async (req, res) => {
             return res.status(403).json({ message: 'Unauthorized to delete this event' });
         }
 
+        await Reservation.deleteMany({ event: event._id });
+
         await Event.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Event deleted successfully' });
+
+        res.json({ message: 'Event and associated reservations deleted successfully' });
     } catch (err) {
+        console.error('Delete event error:', err);
         res.status(400).json({ error: err.message });
     }
 };

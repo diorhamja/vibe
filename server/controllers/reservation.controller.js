@@ -18,6 +18,7 @@ module.exports.findExistingReservation = async (req, res) => {
             return res.status(200).json({
             hasReservation: true,
             reservation: existingReservation,
+            status: existingReservation.status
             });
         }
     
@@ -39,7 +40,7 @@ module.exports.createReservation = async (req, res) => {
     }
     
     const existingReservation = await Reservation.findOne({ event, user });
-    if (existingReservation) {
+    if (existingReservation && existingReservation.status === 'confirmed') {
         return res.status(400).json({ message: 'You already have a reservation for this event' });
     }
     
@@ -124,6 +125,32 @@ module.exports.getBusinessReservations = async (req, res) => {
         res.status(500).json({ message: "Failed to fetch reservations" });
         }
     };
+
+    module.exports.cancelReservation = async (req, res) => {
+    try {
+        const { id } = req.params;
+    
+        const reservation = await Reservation.findById(id);
+        if (!reservation) {
+        return res.status(404).json({ message: "Reservation not found" });
+        }
+    
+        if (reservation.status === 'cancelled') {
+        return res.status(400).json({ message: "Reservation is already cancelled" });
+        }
+    
+        reservation.status = 'cancelled';
+        await reservation.save();
+    
+        await Event.findByIdAndUpdate(reservation.event, {
+        $inc: { spotsLeft: reservation.noReservations }
+        });
+    
+        res.status(200).json({ message: "Reservation cancelled successfully", reservation });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
 
 module.exports.getAllReservations = async (req, res) => {
     try {

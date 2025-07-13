@@ -19,9 +19,11 @@ import FinishAlert from "./FinishAlert";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useEvents } from "../context/EventContext";
 
 const EventDetail = ({ open, event, onClose }) => {
   const { user } = useAuth();
+  const { setRefresh } = useEvents();
 
   const navigate = useNavigate();
 
@@ -47,14 +49,22 @@ const EventDetail = ({ open, event, onClose }) => {
           { withCredentials: true }
         );
 
-        setHasReservation(res.data.hasReservation);
-        setExistingReservation(res.data.reservation || null);
+        console.log(res.data);
+
+        if (res.data.hasReservation && res.data.status == "confirmed") {
+          setHasReservation(true);
+          setExistingReservation(res.data.reservation);
+        } else {
+          setHasReservation(false);
+          setExistingReservation(null);
+        }
       } catch (err) {
         console.error("Error checking reservation:", err);
       }
     };
 
     checkReservation();
+    setRefresh(true);
   }, [event, user]);
 
   const handleReserve = async () => {
@@ -79,16 +89,34 @@ const EventDetail = ({ open, event, onClose }) => {
     }
   };
 
+  const handleCancel = async () => {
+    if (!existingReservation) {
+      return;
+    }
+
+    try {
+      const res = await axios.patch(
+        `http://localhost:8000/api/reservations/cancel/${existingReservation._id}`,
+        null,
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log(res.data);
+      setReserved(false);
+      setHasReservation(false);
+      setRefresh(true);
+      onClose();
+    } catch (error) {
+      console.error(
+        "Failed to delete reservation:",
+        error.response?.data || error.message
+      );
+    }
+  };
+
   const backgroundImage = event.image;
-  const isPast = (() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const eventDate = new Date(event.date);
-    eventDate.setHours(0, 0, 0, 0);
-
-    return eventDate < today;
-  })();
 
   return (
     <>
@@ -209,40 +237,59 @@ const EventDetail = ({ open, event, onClose }) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
             <SellOutlinedIcon sx={{ color: "#22c55e" }} />
             <Typography variant="body2" fontWeight={600} color="#22c55e">
-              ${event.price} / ticket
+              {event.price === 0 ? "Free" : `$${event.price} / ticket`}
             </Typography>
           </Box>
 
           {hasReservation ? (
-            <Box
-              sx={{
-                mt: 2,
-                p: 2,
-                backgroundColor: "#1e293b",
-                borderRadius: 2,
-                border: "1px solid #334155",
-              }}
-            >
-              <Typography
-                variant="h6"
-                fontWeight="bold"
-                color="success.main"
-                gutterBottom
+            <>
+              <Box
+                sx={{
+                  mt: 2,
+                  p: 2,
+                  backgroundColor: "#1e293b",
+                  borderRadius: 2,
+                  border: "1px solid #334155",
+                }}
               >
-                🎉 You're already booked!
-              </Typography>
-              <Typography variant="body2" color="rgba(255,255,255,0.9)">
-                You reserved{" "}
-                <strong>{existingReservation?.noReservations || 1}</strong>{" "}
-                ticket{existingReservation?.noReservations > 1 ? "s" : ""}.
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{ mt: 1, color: "rgba(255,255,255,0.6)" }}
+                <Typography
+                  variant="h6"
+                  fontWeight="bold"
+                  color="success.main"
+                  gutterBottom
+                >
+                  🎉 You're already booked!
+                </Typography>
+                <Typography variant="body2" color="rgba(255,255,255,0.9)">
+                  You reserved{" "}
+                  <strong>{existingReservation?.noReservations || 1}</strong>{" "}
+                  ticket{existingReservation?.noReservations > 1 ? "s" : ""}.
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ mt: 1, color: "rgba(255,255,255,0.6)" }}
+                >
+                  Show up early and enjoy the event! ✨
+                </Typography>
+              </Box>
+              <Box
+                display={"flex"}
+                padding={2}
+                justifyContent={"center"}
+                mb={2}
               >
-                Show up early and enjoy the event! ✨
-              </Typography>
-            </Box>
+                <Button
+                  sx={{
+                    color: "#ff6666",
+                  }}
+                  onClick={() => {
+                    handleCancel();
+                  }}
+                >
+                  Cancel Reservation
+                </Button>
+              </Box>
+            </>
           ) : (
             <>
               <Typography

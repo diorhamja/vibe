@@ -1,12 +1,5 @@
-import React from "react";
-import {
-  Card,
-  CardMedia,
-  CardContent,
-  Typography,
-  Box,
-  Button,
-} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Card, CardMedia, CardContent, Typography, Box } from "@mui/material";
 import SellOutlinedIcon from "@mui/icons-material/SellOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -15,22 +8,51 @@ import EventDetail from "./EventDetail";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import EditEvent from "./EditEvent";
+import axios from "axios";
 
 const EventCard = ({ event, size = "medium" }) => {
   const { user } = useAuth();
   const { openDialog } = useDialog();
-
   const navigate = useNavigate();
 
+  const [cancelled, setCancelled] = useState(false);
+
+  useEffect(() => {
+    const checkReservation = async () => {
+      if (!user || user.role !== "user") return;
+      try {
+        const response = await axios.post(
+          "http://localhost:8000/api/reservations/check",
+          { event: event._id, user: user._id },
+          { withCredentials: true }
+        );
+
+        console.log(response.data);
+
+        if (
+          response.data.hasReservation &&
+          response.data.status == "cancelled"
+        ) {
+          setCancelled(true);
+        }
+      } catch (error) {
+        console.error("Failed to check reservation", error);
+      }
+    };
+    checkReservation();
+  }, [event, user]);
+
   const isSmall = size === "small";
-  const isPast = (() => {
+  const isInactive = (() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const eventDate = new Date(event.date);
     eventDate.setHours(0, 0, 0, 0);
 
-    return eventDate < today;
+    const eventHasPassed = eventDate < today;
+
+    return eventHasPassed || cancelled;
   })();
 
   const formatDate = (dateString) => {
@@ -74,12 +96,12 @@ const EventCard = ({ event, size = "medium" }) => {
         color: "white",
         boxShadow: 4,
         marginTop: 1,
-        opacity: isPast ? 0.6 : 1,
-        filter: isPast ? "grayscale(0.7)" : "none",
+        opacity: isInactive ? 0.6 : 1,
+        filter: isInactive ? "grayscale(0.7)" : "none",
         transition: "transform 0.3s ease",
-        cursor: isPast ? "default" : "pointer",
+        cursor: isInactive ? "default" : "pointer",
         "&:hover": {
-          transform: isPast ? "none" : "translateY(-6px)",
+          transform: isInactive ? "none" : "translateY(-6px)",
         },
       }}
     >
@@ -156,9 +178,7 @@ const EventCard = ({ event, size = "medium" }) => {
           }}
         >
           {user?.role == "business" ? (
-            <>
-              <ModeEditOutlineOutlinedIcon />
-            </>
+            <ModeEditOutlineOutlinedIcon />
           ) : (
             <>
               <SellOutlinedIcon sx={{ fontSize: 18, color: "#22c55e" }} />

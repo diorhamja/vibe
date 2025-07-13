@@ -40,37 +40,6 @@ const EventProvider = ({ children }) => {
     setRefresh(false);
   }, [selectedDate, refresh, user]);
 
-  const fetchAddress = async (lat, lng) => {
-    try {
-      const res = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json`,
-        {
-          params: {
-            latlng: `${lat},${lng}`,
-            key: import.meta.env.VITE_API_KEY,
-          },
-        }
-      );
-
-      if (res.data.status === "OK") {
-        const result =
-          res.data.results.find(
-            (r) =>
-              r.types.includes("street_address") ||
-              r.types.includes("premise") ||
-              r.types.includes("route")
-          ) || res.data.results[0];
-
-        return result.formatted_address;
-      } else {
-        console.error("Geocoding failed:", res.data.status);
-      }
-    } catch (error) {
-      console.error("Error during geocoding:", error);
-    }
-    return null;
-  };
-
   return (
     <EventContext.Provider
       value={{
@@ -78,7 +47,6 @@ const EventProvider = ({ children }) => {
         setEvents,
         selectedEvent,
         setSelectedEvent,
-        fetchAddress,
         selectedDate,
         setSelectedDate,
         setRefresh,

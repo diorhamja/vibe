@@ -69,7 +69,7 @@ const BusinessReservations = () => {
       <Divider sx={{ mb: 3 }} />
 
       {events.length === 0 ? (
-        <Typography>No reservations found.</Typography>
+        <Typography>No events to show</Typography>
       ) : (
         events.map((event) => (
           <Accordion key={event._id} sx={{ mb: 2, borderRadius: 1 }}>
@@ -96,6 +96,7 @@ const BusinessReservations = () => {
                       <TableCell>User</TableCell>
                       <TableCell>Email</TableCell>
                       <TableCell>Tickets</TableCell>
+                      <TableCell>Status</TableCell>
                       <TableCell>Reservation ID</TableCell>
                     </TableRow>
                   </TableHead>
@@ -113,6 +114,7 @@ const BusinessReservations = () => {
                         </TableCell>
                         <TableCell>{res.user.email}</TableCell>
                         <TableCell>{res.noReservations}</TableCell>
+                        <TableCell>{res.status}</TableCell>
                         <TableCell>{res._id}</TableCell>
                       </TableRow>
                     ))}
