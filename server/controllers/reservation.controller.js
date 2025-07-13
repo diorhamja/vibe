@@ -1,5 +1,6 @@
 const Reservation = require('../models/reservation.model');
 const Event = require('../models/event.model');
+const { sendReservationEmail } = require('../utils/email.js');
 
 module.exports.findExistingReservation = async (req, res) => {
     try {
@@ -51,6 +52,16 @@ module.exports.createReservation = async (req, res) => {
     const populatedReservation = await Reservation.findById(createdReservation._id)
         .populate('user', '-password')
         .populate('event');
+
+    if (populatedReservation) {
+        await sendReservationEmail(
+            populatedReservation.user.email,
+            populatedReservation.user.name,
+            populatedReservation.event,
+            populatedReservation._id.toString(),
+            populatedReservation.noReservations,
+        );
+    }
     
     res.status(201).json(populatedReservation);
     } catch (err) {

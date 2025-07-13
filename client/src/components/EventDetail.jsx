@@ -18,9 +18,12 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import FinishAlert from "./FinishAlert";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const EventDetail = ({ open, event, onClose }) => {
   const { user } = useAuth();
+
+  const navigate = useNavigate();
 
   const [quantity, setQuantity] = useState(1);
   const [reserved, setReserved] = useState(false);
@@ -281,7 +284,13 @@ const EventDetail = ({ open, event, onClose }) => {
         {!hasReservation && (
           <DialogActions sx={{ px: 3, pb: 3 }}>
             <Button
-              onClick={handleReserve}
+              onClick={() => {
+                if (user) {
+                  handleReserve();
+                } else {
+                  navigate("/login");
+                }
+              }}
               variant={reserved ? "outlined" : "contained"}
               color="success"
               fullWidth

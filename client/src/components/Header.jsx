@@ -78,7 +78,7 @@ const Header = () => {
               variant: "standard",
               InputProps: { disableUnderline: true },
               sx: {
-                width: "170px",
+                width: "180px",
                 borderRadius: "25px",
                 boxShadow: "0 0 10px rgba(0, 0, 0, 0.08)",
                 paddingY: 1,

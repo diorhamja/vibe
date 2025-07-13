@@ -8,7 +8,7 @@ const Home = () => {
   return (
     <Box
       sx={{
-        height: "95vh",
+        height: "92vh",
         display: "flex",
         flexDirection: "column",
         width: "90vw",

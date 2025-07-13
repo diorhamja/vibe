@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import FavoriteOutlinedIcon from "@mui/icons-material/FavoriteOutlined";
 import ClearOutlinedIcon from "@mui/icons-material/ClearOutlined";
@@ -8,16 +8,26 @@ import EventCard from "./EventCard";
 import EventCardGrid from "./EventCardGrid";
 import { useDialog } from "../context/DialogContext";
 import EventDetail from "./EventDetail";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const EventSwipeDeck = () => {
+  const { user } = useAuth();
   const { events, setSelectedEvent } = useEvents();
   const { openDialog } = useDialog();
 
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(null);
 
+  const navigate = useNavigate();
+
   const handleVote = (dir) => {
     setDirection(dir);
+
+    if (!user) {
+      navigate("/login");
+      return;
+    }
 
     if (dir == "right") {
       openDialog(
@@ -28,7 +38,6 @@ const EventSwipeDeck = () => {
         />
       );
     }
-
     setTimeout(() => {
       setDirection(null);
       setIndex((prev) => prev + 1);
@@ -51,7 +60,7 @@ const EventSwipeDeck = () => {
         alignItems: "center",
         width: "100%",
         height: "100%",
-        mt: 4,
+        mt: 2,
       }}
     >
       <Box
@@ -96,7 +105,7 @@ const EventSwipeDeck = () => {
           display: "flex",
           justifyContent: "space-between",
           gap: 6,
-          mt: 4,
+          mt: 2,
         }}
       >
         <Button
