@@ -27,8 +27,6 @@ const EventCard = ({ event, size = "medium" }) => {
           { withCredentials: true }
         );
 
-        console.log(response.data);
-
         if (
           response.data.hasReservation &&
           response.data.status == "cancelled"
@@ -105,6 +103,18 @@ const EventCard = ({ event, size = "medium" }) => {
         },
       }}
     >
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "45%",
+          background:
+            "linear-gradient(to top, rgba(10, 20, 50, 0.9), transparent)",
+          zIndex: 1,
+        }}
+      />
       <Box sx={{ position: "relative", height: "100%" }}>
         <CardMedia
           component="img"

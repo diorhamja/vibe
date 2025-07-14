@@ -10,6 +10,7 @@ import {
   TextField,
   InputAdornment,
   Avatar,
+  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SellOutlinedIcon from "@mui/icons-material/SellOutlined";
@@ -32,6 +33,7 @@ const EventDetail = ({ open, event, onClose }) => {
   const [hasReservation, setHasReservation] = useState(false);
   const [existingReservation, setExistingReservation] = useState(null);
   const [isFinishOpen, setIsFinishOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   if (!event) return null;
 
@@ -60,6 +62,8 @@ const EventDetail = ({ open, event, onClose }) => {
         }
       } catch (err) {
         console.error("Error checking reservation:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -117,6 +121,14 @@ const EventDetail = ({ open, event, onClose }) => {
   };
 
   const backgroundImage = event.image;
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress color="primary" />
+      </Box>
+    );
+  }
 
   return (
     <>

@@ -2,20 +2,13 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  height: 100%;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
-  background: hsla(16, 71%, 91%, 1);
-
-background: radial-gradient(circle, hsla(16, 71%, 91%, 1) 8%, hsla(196, 83%, 84%, 1) 66%, hsla(229, 26%, 52%, 1) 100%);
-
-background: -moz-radial-gradient(circle, hsla(16, 71%, 91%, 1) 8%, hsla(196, 83%, 84%, 1) 66%, hsla(229, 26%, 52%, 1) 100%);
-
-background: -webkit-radial-gradient(circle, hsla(16, 71%, 91%, 1) 8%, hsla(196, 83%, 84%, 1) 66%, hsla(229, 26%, 52%, 1) 100%);
-
-filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F8DFD6", endColorstr="#B2E5F8", GradientType=1 );
+  background: #EADFB7;
+  background: radial-gradient(at center, #EADFB7, #989AB4);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -36,8 +29,12 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
+  width: 100%;
+  height: 100%;
   min-width: 320px;
-  min-height: 100vh;
+  display: flex;
+  justfy-content: center;
+  align-content: center;
 }
 
 h1 {
